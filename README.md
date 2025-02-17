@@ -21,9 +21,9 @@ The Calculator:
  6. Operational Emissions Comparison
 
  The Applications:
- • Provides data for policymakers to develop regulations and incentives for promoting eco-friendly vehicle technologies.
- • Supports automotive manufacturers and researchers in optimizing vehicle designs for better environmental performance by understanding the life cycle emissions 
+ 1. Provides data for policymakers to develop regulations and incentives for promoting eco-friendly vehicle technologies.
+ 2. Supports automotive manufacturers and researchers in optimizing vehicle designs for better environmental performance by understanding the life cycle emissions 
     and energy use.
- • Enables analysis of the long-term cost-effectiveness of different vehicle options.
- • Helps assess the carbon footprint and overall environmental impact of different vehicle
-   technologies, aiding in sustainable decision-making.
+ 3. Enables analysis of the long-term cost-effectiveness of different vehicle options.
+ 4. Helps assess the carbon footprint and overall environmental impact of different vehicle
+    technologies, aiding in sustainable decision-making.
