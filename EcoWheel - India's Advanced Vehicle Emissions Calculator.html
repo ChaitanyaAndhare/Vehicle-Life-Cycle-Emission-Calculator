@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoWheel: India's Advanced Vehicle Emissions Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary: #2ECC71;
+            --primary-dark: #27AE60;
+            --secondary: #34495E;
+            --accent: #3498DB;
+            --background: #ECF0F1;
+            --white: #FFFFFF;
+            --shadow: 0 8px 30px rgba(0,0,0,0.12);
+            --gradient: linear-gradient(135deg, #2ECC71, #27AE60);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background);
+            color: var(--secondary);
+            line-height: 1.6;
+        }
+
+        .hero {
+            position: relative;
+            height: 70vh;
+            min-height: 700px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                        url('https://media.istockphoto.com/id/898467608/photo/the-india-gate-in-delhi.jpg?s=612x612&w=0&k=20&c=gXUaUcAJf7TD8VZ1UvBfNGU0SNNzqg-xuIx_eXgL1OM=') center/cover;
+            padding: 2rem;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: var(--white);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--white);
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .calculator-section {
+            margin-top: -100px;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 3;
+        }
+
+        .calculator-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 3rem;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            padding-left: 3rem;
+            border: 2px solid #E0E0E0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.1 );
+        }
+
+        .btn-calculate {
+            background: var(--gradient);
+            color: var(--white);
+            border: none;
+            padding: 1.2rem 2.5rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.3);
+        }
+
+        .results {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            margin-top: 3rem;
+        }
+
+        .results.visible {
+            display: block;
+            opacity: 1;
+        }
+
+        .result-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .result-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(46, 204, 113, 0.1);
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .result-item i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .result-item h4 {
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-item p {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .tree-equivalent {
+            background: var(--gradient);
+            color: var(--white);
+            text-align: center;
+            padding: 2rem;
+            border-radius: 16px;
+            margin: 2rem 0;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-container {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            height: 500px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        .lifespan-ring-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 2rem auto;
+        }
+
+        .lifespan-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .lifespan-info {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .lifespan-percentage {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .lifespan-label {
+            font-size: 1rem;
+            color: var(--secondary);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .calculator-container {
+                padding: 2rem;
+            }
+
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="hero-content">
+            <h1>EcoWheel : India's Advanced Vehicle Emissions Calculator</h1>
+            <p>Empowering informed decisions for a greener automotive future in India</p>
+        </div>
+    </div>
+
+    <section class="calculator-section">
+        <div class="calculator-container">
+            <div class="calculator-grid">
+                <div class="form-group">
+                    <label for="vehicleType">Vehicle Type</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-car"></i>
+                        <select id="vehicleType" class="form-control">
+                            <option value="ICE_Petrol">Internal Combustion Engine (Petrol)</option>
+                            <option value="ICE_Diesel">Internal Combustion Engine ( Diesel)</option>
+                            <option value="BEV"> Battery Electric Vehicle</option>
+                            <option value="HEV_Petrol">Hybrid Electric Vehicle (Petrol)</option>
+                            <option value="HEV_Diesel">Hybrid Electric Vehicle (Diesel)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="mileage">Mileage (km/l or km/kWh)</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <input type="number" id="mileage" class="form-control" min="0" step="0.1" placeholder="Enter vehicle's efficiency" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="distance">Total Distance Driven (km)</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-road"></i>
+                        <input type="number" id="distance" class="form-control" min="0" step="100" placeholder="Enter lifetime distance" required>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="calculateLCA()" class="btn-calculate">
+                <i class="fas fa-calculator"></i> Analyze Environmental Impact
+            </button>
+
+            <div class="results">
+                <div class="lifespan-ring-container">
+                    <canvas id="lifespanRing" class="lifespan-ring"></canvas>
+                    <div class="lifespan-info">
+                        <div class="lifespan-percentage" id="lifespanPercentage">0%</div>
+                        <div class="lifespan-label">of Lifespan emissions</div>
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <div class="result-grid" id="result"></div>
+                </div>
+               
+                <div class="tree-equivalent" id="treeEquivalent"></div>
+
+                <div class="chart-container">
+                    <canvas id="emissionsBreakdownChart"></canvas>
+                </div>
+               
+                <div class="chart-container">
+                    <canvas id="emissionsOverDistanceChart"></canvas>
+                </div>
+               
+                <div class="chart-container">
+                    <canvas id="technologyComparisonChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="operationalEmissionsPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let breakdownChart, comparisonChart, distanceChart, lifespanRingChart, operationalEmissionsPieChart;
+
+        const presetValues = {
+            BEV: {
+                manufacturing: 4637.5,
+                maintenance: 13.75,
+                recycling: 12.5,
+                emissionFactor: 0.82,
+                lifespan: 400000
+            },
+            ICE_Petrol: {
+                manufacturing: 3543.75,
+                maintenance: 25.94,
+                recycling: 7.5,
+                emissionFactor: 2.31,
+                lifespan: 280000
+            },
+            ICE_Diesel: {
+                manufacturing: 3543.75,
+                maintenance: 25.94,
+                recycling: 7.5,
+                emissionFactor: 2.68,
+                lifespan: 280000
+            },
+            HEV_Petrol: {
+                manufacturing: 4325,
+                maintenance: 20.73,
+                recycling: 10,
+                emissionFactor: 1.555,
+                lifespan: 280000
+            },
+            HEV_Diesel: {
+                manufacturing: 4325,
+                maintenance: 20.73,
+                recycling: 10,
+                emissionFactor: 1.74,
+                lifespan: 280000
+            }
+        };
+
+        function updateLifespanRing(vehicleType, distance) {
+            const ctx = document.getElementById('lifespanRing').getContext('2d');
+            const totalLifespan = presetValues[vehicleType].lifespan;
+            const percentage = (distance / totalLifespan) * 100;
+           
+            if (lifespanRingChart) {
+                lifespanRingChart.destroy();
+            }
+
+            lifespanRingChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [percentage, 100 - percentage],
+                        backgroundColor: ['#2ECC71', '#E0E0E0'],
+                        borderWidth: 0,
+                        circumference: 360,
+                        rotation: -90
+                    }]
+                },
+                options: {
+                    cutout: '70%',
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('lifespanPercentage').textContent = `${percentage.toFixed(3)}%`;
+        }
+
+        function calculateLCA() {
+            const vehicleType = document.getElementById('vehicleType').value;
+            const mileage = parseFloat(document.getElementById('mileage').value);
+            const distance = parseFloat(document.getElementById('distance').value);
+
+            if (!mileage || !distance || mileage <= 0 || distance <= 0) {
+                alert('Please enter valid positive numbers for mileage and distance.');
+                return;
+            }
+
+            const resultsDiv = document.querySelector('.results');
+            resultsDiv.classList.add('visible');
+
+            const vehicleData = presetValues[vehicleType];
+            const operationalEmissions = (distance / mileage) * vehicleData.emissionFactor;
+            const totalMaintenanceEmissions = (vehicleData.maintenance * distance) / 1000;
+            const recyclingReduction = (vehicleData.recycling / 100) * vehicleData.manufacturing;
+            const totalEmissions = operationalEmissions + totalMaintenanceEmissions +
+                               vehicleData.manufacturing - recyclingReduction;
+
+            updateLifespanRing(vehicleType, distance);
+
+            document.getElementById('result').innerHTML = `
+                <div class="result-item">
+                    <i class="fas fa-industry"></i>
+                    <h4>Manufacturing Emissions</h4>
+                    <p>${vehicleData.manufacturing.toFixed(2)} kg CO₂-eq</p>
+                </div>
+                <div class="result-item">
+                    <i class="fas fa-car"></i>
+                    <h4>Operational Emissions</h4>
+                    <p>${operationalEmissions.toFixed(2)} kg CO₂-eq</p>
+                </div>
+                <div class="result-item">
+                    <i class="fas fa-tools"></i>
+                    <h4>Maintenance Emissions</h4>
+                    <p>${totalMaintenanceEmissions.toFixed(2)} kg CO₂-eq</p>
+                </div>
+                <div class="result-item">
+                    <i class="fas fa-recycle"></i>
+                    <h4>Recycling Emissions Reduction</h4>
+                    <p>-${recyclingReduction.toFixed(2)} kg CO₂-eq</p>
+                </div>
+                <div class="result-item">
+                    <i class="fas fa-chart-line"></i>
+                    <h4>Total Emissions</h4>
+                    <p>${totalEmissions.toFixed(2)} kg CO₂-eq</p>
+                </div>
+            `;
+
+            const treesNeeded = totalEmissions / 21.77;
+            document.getElementById('treeEquivalent').innerHTML = `
+                <i class="fas fa-tree fa-2x mb-3"></i>
+                <h3>Emissions Offset in Tree Equivalent</h3>
+                <p>It would take approximately ${treesNeeded.toFixed(1)} trees to offset these emissions in a year.</p>
+            `;
+
+            updateEmissionsChart(vehicleData, operationalEmissions, totalMaintenanceEmissions, recyclingReduction);
+            updateEmissionsOverDistance(vehicleType, mileage, distance);
+            updateTechnologyComparison(distance);
+            updateOperationalEmissionsPieChart();
+        }
+
+        function updateEmissionsChart(vehicleData, operationalEmissions, maintenanceEmissions, recyclingReduction) {
+            const ctx = document.getElementById('emissionsBreakdownChart').getContext('2d');
+           
+            if (breakdownChart) {
+                breakdownChart.destroy();
+            }
+
+            breakdownChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Manufacturing', 'Operational', 'Maintenance', 'Recycling Emissions Reduction'],
+                    datasets: [{
+                        label: 'Emissions (kg CO₂-eq)',
+                        data: [
+                            vehicleData.manufacturing,
+                            operationalEmissions,
+                            maintenanceEmissions,
+                            -recyclingReduction
+                        ],
+                        backgroundColor: [
+                            '#FF6B6B',
+                            '#4ECDC4',
+                            '#45B7D1',
+                            '#96CEB4'
+                        ],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Emissions Breakdown',
+                            font: {
+                                size: 16,
+                                family: 'Poppins'
+                            },
+                            padding: 20
+                        },
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'Poppins'
+                                },
+                                padding: 20
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Emissions (kg CO₂-eq)',
+                                font: {
+                                    family: 'Poppins'
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateEmissionsOverDistance(vehicleType, mileage, totalDistance) {
+            const ctx = document.getElementById('emissionsOverDistanceChart').getContext('2d');
+            const vehicleData = presetValues[vehicleType];
+           
+            const intervals = 10;
+            const step = totalDistance / intervals;
+            const dataPoints = [];
+           
+            for (let distance = 0; distance <= totalDistance; distance += step) {
+                const operationalEmissions = (distance / mileage) * vehicleData.emissionFactor;
+                const maintenanceEmissions = (vehicleData.maintenance * distance) / 1000;
+                const recyclingReduction = (vehicleData.recycling / 100) * vehicleData.manufacturing;
+                const totalEmissions = operationalEmissions + maintenanceEmissions +
+                                   vehicleData.manufacturing - recyclingReduction;
+               
+                dataPoints.push({
+                    x: distance,
+                    y: totalEmissions
+                });
+            }
+           
+            if (distanceChart) {
+                distanceChart.destroy();
+            }
+
+            distanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Total Emissions Over Distance',
+                        data: dataPoints,
+                        borderColor: '#2ECC71',
+                        backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Emissions Profile Over Distance',
+                            font: {
+                                size: 16,
+                                family: 'Poppins'
+                            },
+                            padding: 20
+                        },
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'Poppins'
+                                },
+                                padding: 20
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Distance (km)',
+                                font: {
+                                    family: 'Poppins'
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Total Emissions (kg CO₂-eq)',
+                                font: {
+                                    family: 'Poppins'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTechnologyComparison(distance) {
+            const ctx = document.getElementById('technologyComparisonChart').getContext('2d');
+           
+            const comparisons = Object.entries(presetValues).map(([type, data]) => {
+                const operationalEmissions = (distance / 15) * data.emissionFactor;
+                const maintenanceEmissions = (data.maintenance * distance) / 1000;
+                const recyclingReduction = (data.recycling / 100) * data.manufacturing;
+                return {
+                    type: type.replace('_', ' '),
+                    manufacturing: data.manufacturing,
+                    operational: operationalEmissions,
+                    maintenance: maintenanceEmissions,
+                    recycling: recyclingReduction
+                };
+            });
+
+            if (comparisonChart) {
+                comparisonChart.destroy();
+            }
+
+            comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: comparisons.map(c => c.type),
+                    datasets: [
+                        {
+                            label: 'Manufacturing Emissions',
+                            data: comparisons.map(c => c.manufacturing),
+                            backgroundColor: '#FF6B6B',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Operational Emissions',
+                            data: comparisons.map(c => c.operational),
+                            backgroundColor: '#4ECDC4',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Maintenance Emissions',
+                            data: comparisons.map(c => c.maintenance),
+                            backgroundColor: '#45B7D1',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Recycling Emissions',
+                            data: comparisons.map(c => -c.recycling),
+                            backgroundColor: '#96CEB4',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Technology Comparison',
+                            font: {
+                                size: 16,
+                                family: 'Poppins'
+                            },
+                            padding: 20 },
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'Poppins'
+                                },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw.toFixed(2)} kg CO₂-eq`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Emissions (kg CO₂-eq)',
+                                font: {
+                                    family: 'Poppins'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateOperationalEmissionsPieChart() {
+            const ctx = document.getElementById('operationalEmissionsPieChart').getContext('2d');
+           
+            const comparisons = Object.entries(presetValues).map(([type, data]) => {
+                const operationalEmissions = (400000 / 15) * data.emissionFactor;
+                return {
+                    type: type.replace('_', ' '),
+                    operational: operationalEmissions
+                };
+            });
+
+            const totalOperationalEmissions = comparisons.reduce((acc, curr) => acc + curr.operational, 0);
+
+            if (operationalEmissionsPieChart) {
+                operationalEmissionsPieChart.destroy();
+            }
+
+            operationalEmissionsPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: comparisons.map(c => c.type),
+                    datasets: [{
+                        label: 'Operational Emissions',
+                        data: comparisons.map(c => (c.operational / totalOperationalEmissions) * 100),
+                        backgroundColor: [
+                            '#FF6B6B',
+                            '#4ECDC4',
+                            '#45B7D1',
+                            '#96CEB4',
+                            '#2ECC71'
+                        ],
+                        borderColor: '#E0E0E0',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Operational Emissions Comparison',
+                            font: {
+                                size: 16,
+                                family: 'Poppins'
+                            },
+                            padding: 20
+                        },
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'Poppins'
+                                },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw.toFixed(2)}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html> 
